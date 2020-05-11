@@ -1,6 +1,9 @@
 package com.hoon.ppmtool.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.jpa.repository.Temporal;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -24,16 +27,22 @@ public class Project {
     @NotBlank(message = "Project description is required")
     private String description;
 
-    @JsonFormat(pattern = "yyyy-mm-dd")
+//    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date startDate;
-    @JsonFormat(pattern = "yyyy-mm-dd")
+//    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date endDate;
 
-    @JsonFormat(pattern = "yyyy-mm-dd")
+//    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(updatable = false)
+    @CreationTimestamp
     private Date createdAt;
-    @JsonFormat(pattern = "yyyy-mm-dd")
+//    @JsonFormat(pattern = "yyyy-MM-dd")
+    @UpdateTimestamp
     private Date updatedAt;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
+    @JsonIgnore
+    private Backlog backlog;
 
     public Project() {
     }
@@ -102,13 +111,36 @@ public class Project {
         this.updatedAt = updatedAt;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = new Date();
+    public Backlog getBacklog() {
+        return backlog;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = new Date();
+    public void setBacklog(Backlog backlog) {
+        this.backlog = backlog;
+    }
+
+//    @PrePersist
+//    protected void onCreate() {
+//        this.createdAt = new Date();
+//    }
+//
+//    @PreUpdate
+//    protected void onUpdate() {
+//        this.updatedAt = new Date();
+//    }
+
+    @Override
+    public String toString() {
+        return "Project{" +
+                "id=" + id +
+                ", projectName='" + projectName + '\'' +
+                ", projectIdentifier='" + projectIdentifier + '\'' +
+                ", description='" + description + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", backlog=" + backlog +
+                '}';
     }
 }
