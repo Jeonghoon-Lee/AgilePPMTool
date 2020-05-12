@@ -70,9 +70,9 @@ public class ProjectTaskService {
         ProjectTask oldProjectTask = this.findProjectTaskByProjectSequence(projectIdentifier, projectSequence);
 
         // check projectTask Id, projectIdentifier, projectSequence number
-        if ((updatedTask.getId() != oldProjectTask.getId())
-                || !updatedTask.getProjectIdentifier().equals(oldProjectTask.getProjectIdentifier())
-                || !updatedTask.getProjectSequence().equals(oldProjectTask.getProjectSequence())) {
+        if ((oldProjectTask.getId() != updatedTask.getId())
+                || !oldProjectTask.getProjectIdentifier().equals(updatedTask.getProjectIdentifier())
+                || !oldProjectTask.getProjectSequence().equals(updatedTask.getProjectSequence())) {
             throw new ProjectNotFoundException("Invalid project task with ID: '" + projectSequence + ". Fail to update");
         }
         return projectTaskRepository.save(updatedTask);

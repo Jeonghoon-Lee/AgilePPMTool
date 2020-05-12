@@ -47,7 +47,7 @@ public class ProjectTask {
     protected void onCreate() {
 //        this.createdAt = new Date();
         // set default value
-        if (this.status == null) {
+        if (this.status == null || this.status == "") {
             this.status = "TODO";
         }
         if (this.priority == null || this.priority == 0) {
