@@ -12,8 +12,6 @@ import Select from '../components/UI/CustomInputs/Select'
 const CreateUpdateProjectTaskForm = props => {
   const { projectId, taskId } = props.match.params
 
-  console.log(projectId, taskId);
-  
   useEffect(() => {
     if (taskId !== undefined) {
       props.onFetchProjectTaskById(projectId, taskId)
@@ -21,14 +19,17 @@ const CreateUpdateProjectTaskForm = props => {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // check invalid path
-  if (projectId !== undefined && !isEmpty(props.error))
-    return <Redirect to={`/project-board/${projectId}`} />
+  if (isEmpty(props.project)) {
+    return <Redirect to={`/dashboard`} />
+  }
 
   return (
     <Formik
       enableReinitialize={true}
       initialValues={{
         id: props.task.id,
+        projectSequence: props.task.projectSequence,
+        projectIdentifier: props.task.projectIdentifier,
         summary: props.task.summary || '',
         acceptanceCriteria: props.task.acceptanceCriteria || '',
         dueDate: props.task.dueDate || '',
@@ -47,7 +48,11 @@ const CreateUpdateProjectTaskForm = props => {
           .oneOf(['TODO', 'IN_PROGRESS', 'DONE']),
       })}
       onSubmit={(values, { setSubmitting }) => {
-        props.onCreateUpdateProjectTask(projectId, values, props.history)
+        if (values.id === undefined) {
+          props.onCreateProjectTask(projectId, values, props.history)
+        } else {
+          props.onUpdateProjectTask(projectId, taskId, values, props.history)
+        }
         setSubmitting(false)
       }}
     >
@@ -62,7 +67,8 @@ const CreateUpdateProjectTaskForm = props => {
                 <h4 className="display-4 text-center">
                   {taskId === undefined ? 'ADD ' : 'UPDATE '}Project Task
                   <p className="lead text-center">
-                    {props.project.projectName + ' / ' + props.project.projectIdentifier}
+                    {props.project.projectName}
+                    {props.task.projectSequence && (' / ' + props.task.projectSequence)}
                   </p>
                 </h4>
                 <Form>
@@ -78,7 +84,7 @@ const CreateUpdateProjectTaskForm = props => {
                   />
                   <Input label="Due Date" name="dueDate" type="date" />
                   <Select name="priority">
-                    <option value="">Select Priority</option>
+                    <option value="0">Select Priority</option>
                     <option value="1">High</option>
                     <option value="2">Medium</option>
                     <option value="3">Low</option>
@@ -116,7 +122,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProp = dispatch => {
   return {
-    onCreateUpdateProjectTask: (projectId, task, history) => dispatch(actions.createUpdateProjectTask(projectId, task, history)),
+    onCreateProjectTask: (projectId, task, history) => dispatch(actions.createProjectTask(projectId, task, history)),
+    onUpdateProjectTask: (projectId, taskId, task, history) => dispatch(actions.updateProjectTask(projectId, taskId, task, history)),
     onFetchProjectTaskById: (projectId, taskSequence) => dispatch(actions.fetchProjectTaskById(projectId, taskSequence)),
   }
 }

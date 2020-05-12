@@ -56,7 +56,7 @@ export const deleteProjectTaskFail = (error) => {
   }
 }
 
-export const createUpdateProjectTask = (projectId, projectTask, history) => {
+export const createProjectTask = (projectId, projectTask, history) => {
   return async dispatch => {
     try {
       await axios.post(`/api/backlog/${projectId}`, projectTask)
@@ -74,7 +74,8 @@ export const fetchProjectTasks = (projectIdentifier) => {
       const res = await axios.get(`http://localhost:8080/api/backlog/${projectIdentifier}`)
       dispatch(fetchProjectTasksSuccess(res.data))
     } catch (error) {
-      dispatch(fetchProjectTasksFail(error))
+      console.log('error', error.response.data)
+      dispatch(fetchProjectTasksFail(error.response.data))
     }
   }
 }
@@ -99,4 +100,15 @@ export const deleteProjectTaskById = (projectId, taskSequence) => {
       dispatch(deleteProjectTaskFail(err))
     }
   }  
+}
+
+export const updateProjectTask = (projectId, taskId, projectTask, history) => {
+  return async dispatch => {
+    try {
+      await axios.patch(`/api/backlog/${projectId}/${taskId}`, projectTask)
+      history.push(`/project-board/${projectId}`)
+    } catch (err) {
+      dispatch(createUpdateProjectTaskFail(err.response.data))
+    }
+  }
 }

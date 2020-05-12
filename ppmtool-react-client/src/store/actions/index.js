@@ -6,8 +6,9 @@ export {
 } from './project'
 
 export {
+  createProjectTask,
+  updateProjectTask,
   fetchProjectTasks,
-  createUpdateProjectTask,
   fetchProjectTaskById,
   deleteProjectTaskById
 } from './backlog'

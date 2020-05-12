@@ -7,6 +7,14 @@ const initialState = {
   loading: false,
 }
 
+const createUpdateProjectTaskFail = (state, action) => {
+  return {
+    ...state,
+    task: {},
+    error: action.error
+  }
+}
+
 const fetchProjectTasksStart = (state, action) => {
   return {
     ...state,
@@ -65,6 +73,8 @@ const deleteProjectTaskFail = (state, action) => {
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
+    case actionTypes.CREATE_UPDATE_PROJECT_TASK_FAIL: return createUpdateProjectTaskFail(state, action)
+
     case actionTypes.FETCH_PROJECT_TASKS_START: return fetchProjectTasksStart(state, action)
     case actionTypes.FETCH_PROJECT_TASKS_SUCCESS: return fetchProjectTasksSuccess(state, action)
     case actionTypes.FETCH_PROJECT_TASKS_FAIL: return fetchProjectTasksFail(state, action)

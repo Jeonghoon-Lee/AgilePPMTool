@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 
 import Spinner from '../components/UI/Spinner/Spinner'
 import CreateProjectTaskButton from '../components/UI/CustomButtons/CreateProjectTaskButton'
-import { isEqual } from 'lodash'
+import { isEqual, isEmpty } from 'lodash'
 import * as actions from '../store/actions'
 import Tasks from '../components/Project/Tasks/Tasks'
 
@@ -20,33 +20,56 @@ class ProjectBoard extends Component {
     let projectTasks = <Spinner />
 
     if (!this.props.loading) {
-      projectTasks = (
-        <React.Fragment>
-          <CreateProjectTaskButton
-            projectId={this.props.match.params.projectId}
-          />
-          <hr />
-          <div className="row">
-            <Tasks
-              title="TO DO"
-              color="bg-secondary"
-              tasks={this.props.tasks.filter(task => isEqual(task.status, "TODO"))}
-            />
-            <Tasks
-              title="In Progress"
-              color="bg-primary"
-              tasks={this.props.tasks.filter(task => isEqual(task.status, "IN_PROGRESS"))}
-            />
-            <Tasks
-              title="Done"
-              color="bg-success"
-              tasks={this.props.tasks.filter(task => isEqual(task.status, "DONE"))}
-            />
+      if (!isEmpty(this.props.error)) {
+        projectTasks = (
+          <div className="alert alert-danger text-center">
+            {this.props.error.projectNotFound}
           </div>
-        </React.Fragment>
-      )
+        )
+      } else {
+        let tasksBoard = (
+          <div className="alert alert-info text-center">
+            No Project Tasks on this board
+          </div>
+        )
+        if (!isEmpty(this.props.tasks)) {
+          tasksBoard = (
+            <div className="row">
+              <Tasks
+                title="TO DO"
+                color="bg-secondary"
+                tasks={this.props.tasks.filter(task =>
+                  isEqual(task.status, 'TODO')
+                )}
+              />
+              <Tasks
+                title="In Progress"
+                color="bg-primary"
+                tasks={this.props.tasks.filter(task =>
+                  isEqual(task.status, 'IN_PROGRESS')
+                )}
+              />
+              <Tasks
+                title="Done"
+                color="bg-success"
+                tasks={this.props.tasks.filter(task =>
+                  isEqual(task.status, 'DONE')
+                )}
+              />
+            </div>
+          )
+        }
+        projectTasks = (
+          <React.Fragment>
+            <CreateProjectTaskButton
+              projectId={this.props.match.params.projectId}
+            />
+            <hr />
+            {tasksBoard}
+          </React.Fragment>
+        )
+      }
     }
-
     return <div className="container">{projectTasks}</div>
   }
 }
