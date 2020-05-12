@@ -1,0 +1,72 @@
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+
+import Spinner from '../components/UI/Spinner/Spinner'
+import CreateProjectTaskButton from '../components/UI/CustomButtons/CreateProjectTaskButton'
+import { isEqual } from 'lodash'
+import * as actions from '../store/actions'
+import Tasks from '../components/Project/Tasks/Tasks'
+
+class ProjectBoard extends Component {
+  componentDidMount() {
+    const { projectId } = this.props.match.params
+    if (projectId !== undefined) {
+      this.props.onFetchProjectByProjectId(projectId)
+      this.props.onFetchProjectTasks(projectId)
+    }
+  }
+
+  render() {
+    let projectTasks = <Spinner />
+
+    if (!this.props.loading) {
+      projectTasks = (
+        <React.Fragment>
+          <CreateProjectTaskButton
+            projectId={this.props.match.params.projectId}
+          />
+          <hr />
+          <div className="row">
+            <Tasks
+              title="TO DO"
+              color="bg-secondary"
+              tasks={this.props.tasks.filter(task => isEqual(task.status, "TODO"))}
+            />
+            <Tasks
+              title="In Progress"
+              color="bg-primary"
+              tasks={this.props.tasks.filter(task => isEqual(task.status, "IN_PROGRESS"))}
+            />
+            <Tasks
+              title="Done"
+              color="bg-success"
+              tasks={this.props.tasks.filter(task => isEqual(task.status, "DONE"))}
+            />
+          </div>
+        </React.Fragment>
+      )
+    }
+
+    return <div className="container">{projectTasks}</div>
+  }
+}
+
+const mapStateToProps = state => {
+  return {
+    tasks: state.backlog.tasks,
+    project: state.project.project,
+    loading: state.backlog.loading,
+    error: state.backlog.error,
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onFetchProjectByProjectId: projectIdentifier =>
+      dispatch(actions.fetchProjectByProjectId(projectIdentifier)),
+    onFetchProjectTasks: projectIdentifier =>
+      dispatch(actions.fetchProjectTasks(projectIdentifier)),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProjectBoard)

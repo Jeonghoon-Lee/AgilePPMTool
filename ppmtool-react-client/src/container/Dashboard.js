@@ -5,7 +5,7 @@ import * as actions from '../store/actions'
 import Spinner from '../components/UI/Spinner/Spinner'
 
 import ProjectItem from '../components/Project/ProjectItem/ProjectItem'
-import CreateProjectButton from '../components/UI/CreateProjectButton/CreateProjectButton'
+import CreateProjectButton from '../components/UI/CustomButtons/CreateProjectButton'
 
 class Dashboard extends Component {
   componentDidMount() {

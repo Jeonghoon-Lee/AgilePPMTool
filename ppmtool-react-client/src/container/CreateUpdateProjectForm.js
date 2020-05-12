@@ -9,12 +9,12 @@ import * as Yup from 'yup'
 import * as actions from '../store/actions'
 import { Redirect } from 'react-router-dom'
 
-const UpdateProject = props => {
+const CreateUpdateProjectForm = props => {
   const { id } = props.match.params
   useEffect(() => {
     // in case of Update Project
     if (id !== undefined) {
-      props.onFetchProjectByProjectId(props.match.params.id)
+      props.onFetchProjectByProjectId(id)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -114,4 +114,4 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(UpdateProject)
+export default connect(mapStateToProps, mapDispatchToProps)(CreateUpdateProjectForm)
