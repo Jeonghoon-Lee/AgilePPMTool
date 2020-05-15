@@ -12,7 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/backlog")
@@ -27,17 +27,18 @@ public class BacklogController {
 
     @PostMapping("/{backlogId}")
     public ResponseEntity<?> addProjectTaskToBacklog(@Valid @RequestBody ProjectTask projectTask,
-                                                     BindingResult result, @PathVariable String backlogId) {
+                                                     BindingResult result, @PathVariable String backlogId,
+                                                     Principal principal) {
         ResponseEntity<?> errorMap = mapValidationErrorService.validateResult(result);
         if (errorMap != null) return errorMap;
 
-        ProjectTask projectTask1 = projectTaskService.addProjectTask(backlogId, projectTask);
+        ProjectTask projectTask1 = projectTaskService.addProjectTask(backlogId, projectTask, principal.getName());
         return new ResponseEntity<>(projectTask1, HttpStatus.CREATED);
     }
 
     @GetMapping("/{backlogId}")
-    public Iterable<?> getProjectBackLog(@PathVariable String backlogId) {
-        return projectTaskService.findBacklogByProjectId(backlogId);
+    public Iterable<?> getProjectBackLog(@PathVariable String backlogId, Principal principal) {
+        return projectTaskService.findBacklogByProjectId(backlogId, principal.getName());
     }
 
     @GetMapping("/{backlogId}/{projectTaskId}")
@@ -48,7 +49,7 @@ public class BacklogController {
 
     @PatchMapping("/{backlogId}/{projectTaskId}")
     public ResponseEntity<?> updateProjectTask(@Valid @RequestBody ProjectTask projectTask, BindingResult result,
-                                                @PathVariable String backlogId, @PathVariable String projectTaskId) {
+                                               @PathVariable String backlogId, @PathVariable String projectTaskId) {
         ResponseEntity<?> errorMap = mapValidationErrorService.validateResult(result);
         if (errorMap != null) return errorMap;
 
