@@ -1,11 +1,9 @@
 package com.hoon.ppmtool.services;
 
-import com.hoon.ppmtool.domain.Backlog;
 import com.hoon.ppmtool.domain.Project;
 import com.hoon.ppmtool.domain.User;
 import com.hoon.ppmtool.exeptions.ProjectIdException;
 import com.hoon.ppmtool.exeptions.ProjectNotFoundException;
-import com.hoon.ppmtool.repositories.BacklogRepository;
 import com.hoon.ppmtool.repositories.ProjectRepository;
 import com.hoon.ppmtool.repositories.UserRepository;
 import com.hoon.ppmtool.security.IAuthenticationFacade;
@@ -20,63 +18,58 @@ public class ProjectService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private BacklogRepository backlogRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private IAuthenticationFacade authenticationFacade;
 
-    public Project saveOrUpdateProject(Project project, String username) {
-        String projectIdentifier = project.getProjectIdentifier().toUpperCase();
-        User user = userRepository.findByUsername(username);
+    private String getAuthenticatedUsername() {
+        Authentication authentication = authenticationFacade.getAuthentication();
+        return authentication.getName();
+    }
 
-        // in case of creating user
-        if (project.getId() == null) {
-            project.setUser(user);
-            project.setProjectLeader(user.getUsername());
-            project.setProjectIdentifier(projectIdentifier);
+    private User getAuthenticatedUserByName() {
+        return userRepository.findByUsername(getAuthenticatedUsername());
+    }
 
-            Backlog backlog = new Backlog();
-            project.setBacklog(backlog);
-            backlog.setProject(project);
-            backlog.setProjectIdentifier(projectIdentifier);
-        }
-        // updating existing user
-        else {
-            Project oldProject = projectRepository.findByProjectIdentifier(projectIdentifier);
-            if (oldProject == null || !oldProject.getProjectLeader().equals(username)) {
-                throw new ProjectNotFoundException("Project not found in your account.");
-            }
-            // updating missing values from client request
-            // Need to implement patching logic for partial project
-            project.setUser(oldProject.getUser());
-            project.setProjectLeader(username);
-
-            // don't need this code.
-            // project.setBacklog(backlogRepository.findByProjectIdentifier(projectIdentifier));
-        }
-
+    private Project createProject(Project project) {
         try {
-            // Need to implement a logic if you want to get an full entity
-            // when you update an entity partially
+            User authUser = getAuthenticatedUserByName();
+
+            // set authenticated user information
+            project.setUser(authUser);
+            project.setProjectLeader(authUser.getUsername());
+
             return projectRepository.save(project);
         } catch (Exception e) {
-            throw new ProjectIdException("Project ID '" + projectIdentifier + "' already exists");
+            throw new ProjectIdException("Project ID '" + project.getProjectIdentifier() + "' already exists");
         }
     }
 
-    public Project findProjectByIdentifier(String projectIdentifier, String username) {
-        Project project = projectRepository.findByProjectIdentifier(projectIdentifier.toUpperCase());
+    private Project updateProject(Project newProject) {
+        User authUser = getAuthenticatedUserByName();
+        Project oldProject = projectRepository.findByProjectIdentifier(newProject.getProjectIdentifier().toUpperCase());
 
-        if (project == null) {
-            throw new ProjectIdException("Project ID '" + projectIdentifier + "' does not exist");
+        if (oldProject == null || !oldProject.getProjectLeader().equals(authUser.getUsername())) {
+            throw new ProjectNotFoundException("Project not found in your account.");
         }
-        if (!project.getProjectLeader().equals(username)) {
-            throw new ProjectNotFoundException("Project not found in your account");
+        // updating missing values from client request
+        // Need to implement patching logic for partial project
+        newProject.setUser(oldProject.getUser());
+        newProject.setProjectLeader(authUser.getUsername());
+
+        try {
+            return projectRepository.save(newProject);
+        } catch (Exception e) {
+            throw new ProjectIdException("Project ID '" + newProject.getProjectIdentifier() + "' failed to update!");
         }
-        return project;
+    }
+
+    public Project saveOrUpdateProject(Project project) {
+        if (project.getId() == null) {
+            return createProject(project);
+        }
+        return updateProject(project);
     }
 
     public Project findProjectByIdentifier(String projectIdentifier) {
@@ -84,7 +77,7 @@ public class ProjectService {
         String authUsername = authenticationFacade.getAuthentication().getName();
 
         if (project == null) {
-            throw new ProjectIdException("Project ID '" + projectIdentifier + "' does not exist");
+            throw new ProjectIdException("Project ID[" + projectIdentifier + "] does not exist");
         }
         if (!project.getProjectLeader().equals(authUsername)) {
             throw new ProjectNotFoundException("Project not found in your account");
@@ -92,11 +85,12 @@ public class ProjectService {
         return project;
     }
 
-    public Iterable<Project> findAllProjects(String username) {
-        return projectRepository.findAllByProjectLeader(username);
+    public Iterable<Project> findAllProjects() {
+        String authUsername = authenticationFacade.getAuthentication().getName();
+        return projectRepository.findAllByProjectLeader(authUsername);
     }
 
-    public void deleteProjectByIdentifier(String projectIdentifier, String username) {
-        projectRepository.delete(findProjectByIdentifier(projectIdentifier, username));
+    public void deleteProjectByIdentifier(String projectIdentifier) {
+        projectRepository.delete(findProjectByIdentifier(projectIdentifier));
     }
 }

@@ -46,20 +46,15 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody User user, BindingResult result) {
         userValidator.validate(user, result);
+        if (result.hasErrors()) return mapValidationErrorService.mapValidationErrorResult(result);
 
-        ResponseEntity<?> errorMap = mapValidationErrorService.validateResult(result);
-        if (errorMap != null) return errorMap;
-
-        User newUser =userService.saveUser(user);
-        newUser.setConfirmpassword("");
-
-        return new ResponseEntity<User>(newUser, HttpStatus.CREATED);
+        User newUser = userService.saveUser(user);
+        return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest, BindingResult result) {
-        ResponseEntity<?> errorMap = mapValidationErrorService.validateResult(result);
-        if (errorMap != null) return errorMap;
+        if (result.hasErrors()) return mapValidationErrorService.mapValidationErrorResult(result);
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -67,7 +62,6 @@ public class UserController {
                         loginRequest.getPassword()
                 )
         );
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = TOKEN_PREFIX + tokenProvider.generateToken(authentication);
 

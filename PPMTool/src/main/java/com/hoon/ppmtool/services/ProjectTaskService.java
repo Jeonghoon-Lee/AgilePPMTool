@@ -1,11 +1,9 @@
 package com.hoon.ppmtool.services;
 
-import com.hoon.ppmtool.domain.Backlog;
 import com.hoon.ppmtool.domain.Project;
 import com.hoon.ppmtool.domain.ProjectTask;
+import com.hoon.ppmtool.exeptions.ProjectIdException;
 import com.hoon.ppmtool.exeptions.ProjectNotFoundException;
-import com.hoon.ppmtool.repositories.BacklogRepository;
-import com.hoon.ppmtool.repositories.ProjectRepository;
 import com.hoon.ppmtool.repositories.ProjectTaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,63 +12,47 @@ import org.springframework.stereotype.Service;
 public class ProjectTaskService {
 
     @Autowired
-    private BacklogRepository backlogRepository;
-
-    @Autowired
     private ProjectTaskRepository projectTaskRepository;
 
     @Autowired
-    private  ProjectService projectService;
+    private ProjectService projectService;
 
-    public ProjectTask addProjectTask(String projectIdentifier, ProjectTask projectTask, String username) {
-//        try {
-            // Project tasks to be added to a specific project, project != null, backlog exists.
-            //Backlog backlog = backlogRepository.findByProjectIdentifier(projectIdentifier);
+    public ProjectTask addProjectTask(String projectIdentifier, ProjectTask projectTask) {
+        if (projectTask.getId() != null)
+            throw new ProjectIdException("Invalid ID[" + projectTask.getId() + "] value exception.");
 
-        Backlog backlog = projectService.findProjectByIdentifier(projectIdentifier, username).getBacklog();
+        Project project = projectService.findProjectByIdentifier(projectIdentifier);
 
-        // set the backlog to the project task
-        projectTask.setBacklog(backlog);
-        // we want our project sequence to be like this: IDPRO-1 IDPRO-2
-        Integer backlogSequence = backlog.getPtSequence();
-        // Update the backlog sequence
-        backlog.setPtSequence(++backlogSequence);
-        // Add Sequence to Project Task
-        projectTask.setProjectSequence(projectIdentifier + "-" + backlogSequence);
+        // Increase the project task sequence number before adding project task.
+        project.increaseProjectTaskSequence();
+
+        // set project task information
+        projectTask.setProject(project);
+        projectTask.setProjectSequence(projectIdentifier + "-" + project.getProjectTaskSequence());
         projectTask.setProjectIdentifier(projectIdentifier);
 
         return projectTaskRepository.save(projectTask);
-//        } catch (Exception e) {
-//            throw new ProjectNotFoundException("Project not found");
-//        }
     }
 
-    public Iterable<ProjectTask> findBacklogByProjectId(String projectIdentifier, String username) {
-//        Backlog backlog = backlogRepository.findByProjectIdentifier(projectIdentifier);
-        Backlog backlog = projectService.findProjectByIdentifier(projectIdentifier, username).getBacklog();
+    public Iterable<ProjectTask> findProjectTasksByProjectId(String projectIdentifier) {
+        if (projectService.findProjectByIdentifier(projectIdentifier) == null)
+            throw new ProjectNotFoundException("Project ID[" + projectIdentifier + "] does not exist.");
 
-        if (backlog == null) {
-            throw new ProjectNotFoundException("Project with ID: '" + projectIdentifier + " does not exist.");
-        }
         return projectTaskRepository.findByProjectIdentifierOrderByPriority(projectIdentifier);
     }
 
     public ProjectTask findProjectTaskByProjectSequence(String projectIdentifier, String projectSequence) {
-//        Backlog backlog = backlogRepository.findByProjectIdentifier(projectIdentifier);
-
-        Backlog backlog = projectService.findProjectByIdentifier(projectIdentifier).getBacklog();
-
-        if (backlog == null) {
-            throw new ProjectNotFoundException("Project with ID: '" + projectIdentifier + " does not exist.");
-        }
+        // check project identifier validation
+        if (projectService.findProjectByIdentifier(projectIdentifier) == null)
+            throw new ProjectNotFoundException("Project ID[" + projectIdentifier + "] does not exist.");
 
         ProjectTask projectTask = projectTaskRepository.findByProjectSequence(projectSequence);
-        if (projectTask == null) {
-            throw new ProjectNotFoundException("Project Task with ID: '" + projectSequence + " does not exist.");
-        }
 
+        if (projectTask == null) {
+            throw new ProjectNotFoundException("Project Task ID[" + projectSequence + "] does not exist.");
+        }
         if (!projectTask.getProjectIdentifier().equals(projectIdentifier)) {
-            throw new ProjectNotFoundException("Project Task with ID: '" + projectSequence + " does not exist in project");
+            throw new ProjectNotFoundException("Project Task ID[" + projectSequence + "] does not exist in project");
         }
         return projectTask;
     }

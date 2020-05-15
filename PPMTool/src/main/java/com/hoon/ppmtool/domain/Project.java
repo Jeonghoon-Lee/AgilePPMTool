@@ -3,12 +3,13 @@ package com.hoon.ppmtool.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.jpa.repository.Temporal;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 public class Project {
@@ -27,22 +28,21 @@ public class Project {
     @NotBlank(message = "Project description is required")
     private String description;
 
-//    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date startDate;
-//    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date endDate;
 
-//    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(updatable = false)
     @CreationTimestamp
     private Date createdAt;
-//    @JsonFormat(pattern = "yyyy-MM-dd")
     @UpdateTimestamp
     private Date updatedAt;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
     @JsonIgnore
-    private Backlog backlog;
+    private Integer projectTaskSequence = 0;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH, orphanRemoval = true, mappedBy = "project")
+    @JsonIgnore
+    private List<ProjectTask> projectTasks = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
@@ -50,8 +50,7 @@ public class Project {
 
     private String projectLeader;
 
-    public Project() {
-    }
+    public Project() { }
 
     public Long getId() {
         return id;
@@ -117,12 +116,24 @@ public class Project {
         this.updatedAt = updatedAt;
     }
 
-    public Backlog getBacklog() {
-        return backlog;
+    public Integer getProjectTaskSequence() {
+        return projectTaskSequence;
     }
 
-    public void setBacklog(Backlog backlog) {
-        this.backlog = backlog;
+    public void setProjectTaskSequence(Integer projectTaskSequence) {
+        this.projectTaskSequence = projectTaskSequence;
+    }
+
+    public void increaseProjectTaskSequence() {
+        this.projectTaskSequence++;
+    }
+
+    public List<ProjectTask> getProjectTasks() {
+        return projectTasks;
+    }
+
+    public void setProjectTasks(List<ProjectTask> projectTasks) {
+        this.projectTasks = projectTasks;
     }
 
     public User getUser() {
@@ -152,19 +163,8 @@ public class Project {
                 ", endDate=" + endDate +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
-                ", backlog=" + backlog +
                 ", user=" + user +
                 ", projectLeader='" + projectLeader + '\'' +
                 '}';
     }
-
-    //    @PrePersist
-//    protected void onCreate() {
-//        this.createdAt = new Date();
-//    }
-//
-//    @PreUpdate
-//    protected void onUpdate() {
-//        this.updatedAt = new Date();
-//    }
 }

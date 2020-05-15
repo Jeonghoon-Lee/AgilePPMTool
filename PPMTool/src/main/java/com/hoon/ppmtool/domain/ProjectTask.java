@@ -29,9 +29,9 @@ public class ProjectTask {
 
     // ManyToOne with Backlog
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="backlog_id", updatable = false, nullable = false)
+    @JoinColumn(name="project_id", updatable = false, nullable = false)
     @JsonIgnore
-    private Backlog backlog;
+    private Project project;
 
     @Column(updatable = false)
     private String projectIdentifier;
@@ -42,10 +42,7 @@ public class ProjectTask {
     @UpdateTimestamp
     private Date updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-//        this.createdAt = new Date();
-        // set default value
+    private void setDefaultValues() {
         if (this.status == null || this.status == "") {
             this.status = "TODO";
         }
@@ -54,10 +51,15 @@ public class ProjectTask {
         }
     }
 
-//    @PreUpdate
-//    protected void onUpdate() {
-//        this.updatedAt = new Date();
-//    }
+    @PrePersist
+    protected void onCreate() {
+        setDefaultValues();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        setDefaultValues();
+    }
 
     public ProjectTask() {
     }
@@ -142,12 +144,12 @@ public class ProjectTask {
         this.updatedAt = updatedAt;
     }
 
-    public Backlog getBacklog() {
-        return backlog;
+    public Project getProject() {
+        return project;
     }
 
-    public void setBacklog(Backlog backlog) {
-        this.backlog = backlog;
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.hoon.ppmtool.security;
 
-import com.hoon.ppmtool.domain.User;
 import com.hoon.ppmtool.services.MyUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,7 +14,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.file.attribute.UserPrincipal;
 import java.util.Collections;
 
 import static com.hoon.ppmtool.security.SecurityConstants.HEADER_STRING;

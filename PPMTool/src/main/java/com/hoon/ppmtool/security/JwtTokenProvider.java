@@ -1,6 +1,5 @@
 package com.hoon.ppmtool.security;
 
-import com.hoon.ppmtool.domain.User;
 import io.jsonwebtoken.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,6 @@ public class JwtTokenProvider {
 
     // Generate the token
     public String generateToken(Authentication authentication) {
-//        User user = (User)authentication.getPrincipal();
         MyUserPrincipal userPrincipal = (MyUserPrincipal)authentication.getPrincipal();
 
         Date now = new Date(System.currentTimeMillis());
