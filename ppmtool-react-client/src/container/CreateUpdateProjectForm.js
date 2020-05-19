@@ -18,9 +18,11 @@ const CreateUpdateProjectForm = props => {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // check invalid path
-  if (id !== undefined && !isEmpty(props.errors))
+  // check invalid 
+  if (!props.isAuthenticated || (id !== undefined && !isEmpty(props.errors))) {
+    console.log('redirect', props.isAuthenticated);
     return(<Redirect to="/" />)
+  }
 
   return (
     <Formik
@@ -102,6 +104,7 @@ const mapStateToProps = state => {
   return {
     errors: state.project.errors,
     project: state.project.project,
+    isAuthenticated: state.user.isAuthenticated,
   }
 }
 

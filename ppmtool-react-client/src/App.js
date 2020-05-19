@@ -1,34 +1,89 @@
-import React from 'react'
-import { Route, Switch, Redirect } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Route, Switch, Redirect, withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
+import asyncComponent from './hoc/asyncComponent/asyncComponent'
+
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-import Dashboard from './container/Dashboard'
-import Header from './components/Layout/Header'
-import CreateUpdateProjectForm from './container/CreateUpdateProjectForm'
-import CreateUpdateProjectTaskForm from './container/CreateUpdateProjectTaskForm'
-import ProjectBoard from './container/ProjectBoard'
+// import Header from './components/Layout/Header'
+import Layout from './components/Layout/Layout'
+import WelcomePage from './components/Layout/WelcomePage'
+import Logout from './container/Users/Logout'
 
-function App() {
+import * as actions from './store/actions'
+
+
+const asyncDashboard = asyncComponent(() => {
+  return import('./container/Dashboard')
+})
+const asyncCreateUpdateProjectForm = asyncComponent(() => {
+  return import('./container/CreateUpdateProjectForm')
+})
+const asyncCreateUpdateProjectTaskForm = asyncComponent(() => {
+  return import('./container/CreateUpdateProjectTaskForm')
+})
+const asyncProjectBoard = asyncComponent(() => {
+  return import('./container/ProjectBoard')
+})
+const asyncLoginForm = asyncComponent(() => {
+  return import('./container/Users/LoginForm')
+})
+const asyncRegisterForm = asyncComponent(() => {
+  return import('./container/Users/RegisterForm')
+})
+
+const App = (props) => {
+  const { onTryAutoSignup } = props
+
+  useEffect(() => {
+    onTryAutoSignup()
+  }, [onTryAutoSignup])
+
   let routes = (
     <Switch>
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/addProject" component={CreateUpdateProjectForm} />
-      <Route path="/updateProject/:id" component={CreateUpdateProjectForm} />
-      <Route path="/project-board/:projectId" component={ProjectBoard} />
-      <Route path="/addProjectTask/:projectId" component={CreateUpdateProjectTaskForm} />
-      <Route path="/updateProjectTask/:projectId/:taskId" component={CreateUpdateProjectTaskForm} />
-      <Route path="/" component={Dashboard} exact />
+      <Route path="/users/login" component={asyncLoginForm} />
+      <Route path="/users/register" component={asyncRegisterForm} />
+      <Route path="/" component={WelcomePage} exact />
       <Redirect to="/" />
     </Switch>
   )
 
+  if (props.isAuthenticated) {
+    routes = (
+      <Switch>
+        <Route path="/dashboard" component={asyncDashboard} />
+        <Route path="/addProject" component={asyncCreateUpdateProjectForm} />
+        <Route path="/updateProject/:id" component={asyncCreateUpdateProjectForm} />
+        <Route path="/project-board/:projectId" component={asyncProjectBoard} />
+        <Route path="/addProjectTask/:projectId" component={asyncCreateUpdateProjectTaskForm} />
+        <Route path="/updateProjectTask/:projectId/:taskId" component={asyncCreateUpdateProjectTaskForm} />
+        <Route path="/users/logout" component={Logout} />
+        <Route path="/" component={asyncDashboard} exact />
+        <Redirect to="/" />
+      </Switch>
+    )
+  }
+
   return (
     <div className="App">
-      <Header />
-      {routes}
+      <Layout>
+        {routes}
+      </Layout>
     </div>
   )
 }
 
-export default App
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated: state.user.isAuthenticated,
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onTryAutoSignup: () => dispatch(actions.checkAuthState())
+  }
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App))

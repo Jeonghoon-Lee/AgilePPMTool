@@ -12,3 +12,11 @@ export {
   fetchProjectTaskById,
   deleteProjectTaskById
 } from './backlog'
+
+export {
+  createNewUser,
+  tryLogin,
+  clearLoginError,
+  logout,
+  checkAuthState
+} from './user'

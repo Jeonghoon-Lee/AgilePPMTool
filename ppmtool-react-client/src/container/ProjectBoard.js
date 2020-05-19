@@ -6,6 +6,7 @@ import CreateProjectTaskButton from '../components/UI/CustomButtons/CreateProjec
 import { isEqual, isEmpty } from 'lodash'
 import * as actions from '../store/actions'
 import Tasks from '../components/Project/Tasks/Tasks'
+import { Redirect } from 'react-router-dom'
 
 class ProjectBoard extends Component {
   componentDidMount() {
@@ -18,6 +19,13 @@ class ProjectBoard extends Component {
 
   render() {
     let projectTasks = <Spinner />
+
+    // check invalid 
+    console.log('props', this.props);
+    if (!this.props.isAuthenticated) {
+      console.log('redirect', this.props.isAuthenticated);
+      return(<Redirect to="/" />)
+    }
 
     if (!this.props.loading) {
       if (!isEmpty(this.props.error)) {
@@ -80,6 +88,7 @@ const mapStateToProps = state => {
     project: state.project.project,
     loading: state.backlog.loading,
     error: state.backlog.error,
+    isAuthenticated: state.user.isAuthenticated
   }
 }
 

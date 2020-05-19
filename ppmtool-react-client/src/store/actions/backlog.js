@@ -59,7 +59,7 @@ export const deleteProjectTaskFail = (error) => {
 export const createProjectTask = (projectId, projectTask, history) => {
   return async dispatch => {
     try {
-      await axios.post(`/api/backlog/${projectId}`, projectTask)
+      await axios.post(`/api/project-task/${projectId}`, projectTask)
       history.push(`/project-board/${projectId}`)
     } catch (err) {
       dispatch(createUpdateProjectTaskFail(err.response.data))
@@ -71,10 +71,9 @@ export const fetchProjectTasks = (projectIdentifier) => {
   return async dispatch => {
     dispatch(fetchProjectTasksStart())
     try {
-      const res = await axios.get(`http://localhost:8080/api/backlog/${projectIdentifier}`)
+      const res = await axios.get(`http://localhost:8080/api/project-task/${projectIdentifier}`)
       dispatch(fetchProjectTasksSuccess(res.data))
     } catch (error) {
-      console.log('error', error.response.data)
       dispatch(fetchProjectTasksFail(error.response.data))
     }
   }
@@ -83,7 +82,7 @@ export const fetchProjectTasks = (projectIdentifier) => {
 export const fetchProjectTaskById = (projectId, taskSequence) => {
   return async dispatch => {
     try {
-      const res = await axios.get(`/api/backlog/${projectId}/${taskSequence}`)
+      const res = await axios.get(`/api/project-task/${projectId}/${taskSequence}`)
       dispatch(fetchProjectTaskByIdSuccess(res.data))
     } catch (err) {
       dispatch(fetchProjectTaskByIdFail(err.response.data))
@@ -94,7 +93,7 @@ export const fetchProjectTaskById = (projectId, taskSequence) => {
 export const deleteProjectTaskById = (projectId, taskSequence) => {
   return async dispatch => {
     try {
-      await axios.delete(`/api/backlog/${projectId}/${taskSequence}`)
+      await axios.delete(`/api/project-task/${projectId}/${taskSequence}`)
       dispatch(deleteProjectTaskSuccess(taskSequence))
     } catch (err) {
       dispatch(deleteProjectTaskFail(err))
@@ -105,7 +104,7 @@ export const deleteProjectTaskById = (projectId, taskSequence) => {
 export const updateProjectTask = (projectId, taskId, projectTask, history) => {
   return async dispatch => {
     try {
-      await axios.patch(`/api/backlog/${projectId}/${taskId}`, projectTask)
+      await axios.patch(`/api/project-task/${projectId}/${taskId}`, projectTask)
       history.push(`/project-board/${projectId}`)
     } catch (err) {
       dispatch(createUpdateProjectTaskFail(err.response.data))
