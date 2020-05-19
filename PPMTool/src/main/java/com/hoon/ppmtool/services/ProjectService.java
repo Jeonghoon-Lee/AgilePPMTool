@@ -57,6 +57,7 @@ public class ProjectService {
         // Need to implement patching logic for partial project
         newProject.setUser(oldProject.getUser());
         newProject.setProjectLeader(authUser.getUsername());
+        newProject.setProjectTaskSequence(oldProject.getProjectTaskSequence());
 
         try {
             return projectRepository.save(newProject);
