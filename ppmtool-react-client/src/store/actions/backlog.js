@@ -71,7 +71,7 @@ export const fetchProjectTasks = (projectIdentifier) => {
   return async dispatch => {
     dispatch(fetchProjectTasksStart())
     try {
-      const res = await axios.get(`http://localhost:8080/api/project-task/${projectIdentifier}`)
+      const res = await axios.get(`/api/project-task/${projectIdentifier}`)
       dispatch(fetchProjectTasksSuccess(res.data))
     } catch (error) {
       dispatch(fetchProjectTasksFail(error.response.data))

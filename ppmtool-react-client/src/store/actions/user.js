@@ -63,7 +63,8 @@ export const tryLogin = (user) => {
       const decoded = jwt_decode(token)
 
       dispatch(loginSuccess(decoded))
-      dispatch(checkAuthTimeout(decoded.exp - Date.now() / 1000))
+      // disable auto logout..
+      // dispatch(checkAuthTimeout(decoded.exp - Date.now() / 1000))
     } catch (error) {
       // console.log(error)
       // console.log(error.response.data)
