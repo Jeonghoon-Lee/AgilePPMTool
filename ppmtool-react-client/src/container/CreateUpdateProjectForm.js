@@ -37,7 +37,7 @@ const CreateUpdateProjectForm = props => {
       }}
       validationSchema={Yup.object({
         projectName: Yup.string()
-          .max(15, 'Must be 15 characters or less')
+          .max(30, 'Must be 30 characters or less')
           .required('Required'),
         projectIdentifier: Yup.string()
           .min(4, 'Must be 4 or 5 characters')
